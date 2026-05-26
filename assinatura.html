@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gerador de Assinatura</title>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 40px;
+      background: #f4f6f9;
+      font-family: Arial, Helvetica, sans-serif;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      gap: 40px;
+      align-items: flex-start;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 25px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .formulario {
+      width: 340px;
+    }
+
+    .preview-container {
+      flex: 1;
+      min-width: 500px;
+    }
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: 25px;
+      color: #2563eb;
+      font-size: 24px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      margin-top: 18px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: 0.2s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+    }
+
+    button {
+      width: 100%;
+      margin-top: 25px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .mensagem {
+      margin-top: 15px;
+      background: #dcfce7;
+      color: #166534;
+      padding: 12px;
+      border-radius: 8px;
+      display: none;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    /* VISUALIZAÇÃO */
+
+    .assinatura-box {
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 40px;
+      background: #fafafa;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: auto;
+    }
+
+    /*
+      A assinatura será ampliada APENAS visualmente.
+      O Outlook continuará copiando o tamanho original.
+    */
+
+    .assinatura-preview {
+      transform: scale(1.5);
+      transform-origin: center;
+    }
+
+    /* ASSINATURA */
+
+    .assinatura {
+      background: white;
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      display: inline-block;
+    }
+
+    .tabela {
+      border-collapse: collapse;
+    }
+
+    .logo {
+      vertical-align: middle;
+      padding-right: 12px;
+      white-space: nowrap;
+    }
+
+    .logo img {
+      width: 120px;
+      height: auto;
+      display: block;
+    }
+
+    .linha {
+      border-left: 1px solid #222;
+      width: 12px;
+    }
+
+    .info {
+      vertical-align: middle;
+      padding-left: 12px;
+      line-height: 1.2;
+    }
+
+    .nome {
+      font-size: 13px;
+      font-weight: bold;
+      color: #111827;
+      margin-bottom: 1px;
+    }
+
+    .setor {
+      font-size: 12px;
+      color: #374151;
+      margin-bottom: 1px;
+    }
+
+    .telefone {
+      font-size: 12px;
+      color: #374151;
+      margin-bottom: 1px;
+    }
+
+    .site {
+      margin-top: 0;
+      padding-top: 0;
+      line-height: 1;
+    }
+
+    .site a {
+      color: #2563eb;
+      text-decoration: underline;
+      font-size: 12px;
+      font-weight: normal;
+    }
+
+    /* TUTORIAL */
+
+    .tutorial {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .tutorial ol {
+      margin: 0;
+      padding-left: 22px;
+      color: #374151;
+      line-height: 1.8;
+    }
+
+    .tutorial li {
+      margin-bottom: 10px;
+    }
+
+    .tutorial strong {
+      color: #111827;
+    }
+
+    @media (max-width: 900px) {
+
+      .container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .preview-container,
+      .formulario {
+        width: 100%;
+      }
+
+      .assinatura-preview {
+        transform: scale(1.15);
+      }
+
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- FORMULÁRIO -->
+
+    <div class="card formulario">
+
+      <h2>Preencha seus dados</h2>
+
+      <label>Nome Completo</label>
+      <input
+        type="text"
+        id="inputNome"
+        placeholder="Ex: Regis G. O. Junior"
+      >
+
+      <label>Setor</label>
+      <input
+        type="text"
+        id="inputSetor"
+        placeholder="Ex: NTI"
+      >
+
+      <label>Unidade</label>
+      <input
+        type="text"
+        id="inputUnidade"
+        placeholder="Ex: Sesc Osasco"
+      >
+
+      <label>Telefone / Ramal</label>
+      <input
+        type="text"
+        id="inputTelefone"
+        placeholder="Ex: 11 3184-0941"
+      >
+
+      <button onclick="copiarAssinatura()">
+        Copiar Assinatura
+      </button>
+
+      <div class="mensagem" id="mensagem">
+        Copiado com sucesso.
+      </div>
+
+    </div>
+
+    <!-- VISUALIZAÇÃO -->
+
+    <div class="card preview-container">
+
+      <h2>Visualização</h2>
+
+      <div class="assinatura-box">
+
+        <!-- AUMENTA APENAS A VISUALIZAÇÃO -->
+
+        <div class="assinatura-preview">
+
+          <div class="assinatura" id="assinatura">
+
+            <table class="tabela">
+
+              <tr>
+
+                <!-- LOGO -->
+
+                <td class="logo">
+
+                  <img
+                    src="https://raw.githubusercontent.com/lucianosouza995/Imagens/main/assinatura_email_80_anos_JPG.jpg"
+                    alt="Logo"
+                    width="120"
+                    style="
+                      width: 120px;
+                      max-width: 120px;
+                      height: auto;
+                      display: block;
+                    "
+                  >
+
+                </td>
+
+                <!-- LINHA -->
+
+                <td class="linha"></td>
+
+                <!-- TEXTO -->
+
+                <td class="info">
+
+                  <div
+                    class="nome"
+                    id="previewNome"
+                    style="font-weight: bold;"
+                  >
+                    <strong>Nome Completo</strong>
+                  </div>
+
+                  <div class="setor" id="previewSetor">
+                    Setor | Unidade
+                  </div>
+
+                  <div class="telefone" id="previewTelefone">
+                    Tel.:
+                  </div>
+
+                  <div class="site">
+                    <a href="https://www.sescsp.org.br">
+                      sescsp.org.br
+                    </a>
+                  </div>
+
+                </td>
+
+              </tr>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- TUTORIAL -->
+
+    <div class="card tutorial">
+
+      <h2>Como adicionar no Outlook</h2>
+
+      <ol>
+
+        <li>
+          Clique na engrenagem no canto superior direito do Outlook
+        </li>
+
+        <li>
+          Vá em:
+          <strong>Conta → Assinatura</strong>
+        </li>
+
+        <li>
+          Clique em:
+          <strong>Adicionar assinatura</strong>
+        </li>
+
+        <li>
+          Digite um nome para a assinatura
+        </li>
+
+        <li>
+          Aqui no sistema, clique no botão:
+          <strong>Copiar Assinatura</strong>
+        </li>
+
+        <li>
+          Cole no campo da assinatura do Outlook
+          (<strong>CTRL + V</strong>)
+        </li>
+
+        <li>
+          Marque as caixas:
+          <strong>
+            Definir como padrão para as novas mensagens
+          </strong>
+          e
+          <strong>
+            Definir como padrão para respostas e encaminhamentos
+          </strong>
+        </li>
+
+        <li>
+          Clique em:
+          <strong>Salvar</strong>
+        </li>
+
+	<li>
+	  Qualquer dúvida, entre em contato com a 
+          <strong>NTI.</strong>
+        </li>
+
+      </ol>
+
+    </div>
+
+  </div>
+
+  <script>
+
+    const inputNome = document.getElementById('inputNome');
+    const inputSetor = document.getElementById('inputSetor');
+    const inputUnidade = document.getElementById('inputUnidade');
+    const inputTelefone = document.getElementById('inputTelefone');
+
+    const previewNome = document.getElementById('previewNome');
+    const previewSetor = document.getElementById('previewSetor');
+    const previewTelefone = document.getElementById('previewTelefone');
+
+    function atualizarPreview() {
+
+      previewNome.innerHTML =
+        '<strong>' + (inputNome.value || 'Nome Completo') + '</strong>';
+
+      previewSetor.textContent =
+        `${inputSetor.value || 'Setor'} | ${inputUnidade.value || 'Unidade'}`;
+
+      previewTelefone.textContent =
+        `Tel.: ${inputTelefone.value || ''}`;
+
+    }
+
+    inputNome.addEventListener('input', atualizarPreview);
+    inputSetor.addEventListener('input', atualizarPreview);
+    inputUnidade.addEventListener('input', atualizarPreview);
+    inputTelefone.addEventListener('input', atualizarPreview);
+
+    async function copiarAssinatura() {
+
+      const assinatura =
+        document.getElementById('assinatura');
+
+      try {
+
+        await navigator.clipboard.write([
+
+          new ClipboardItem({
+
+            'text/html': new Blob(
+              [assinatura.innerHTML],
+              { type: 'text/html' }
+            )
+
+          })
+
+        ]);
+
+        const mensagem =
+          document.getElementById('mensagem');
+
+        mensagem.style.display = 'block';
+
+        setTimeout(() => {
+
+          mensagem.style.display = 'none';
+
+        }, 3000);
+
+      } catch (erro) {
+
+        alert('Erro ao copiar assinatura.');
+
+      }
+
+    }
+
+  </script>
+
+</body>
+</html>
